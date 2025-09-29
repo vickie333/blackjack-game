@@ -54,26 +54,26 @@ class PygameUI:
 
     def draw(self):
         self.screen.fill((34,139,34))
-        self.screen.blit(self.bigfont.render("Dealer", True, (255,255,255)), (50, 20))
+        self.screen.blit(self.bigfont.render("Crupier", True, (255,255,255)), (50, 20))
         for i, c in enumerate(self.game.dealer.cards):
             face_up = not (self.game.state == "player_turn" and i == 1)
             self.draw_card(c, 50 + i*(CARD_W+12), 60, face_up=face_up)
 
-        self.screen.blit(self.bigfont.render("Player", True, (255,255,255)), (50, 220))
+        self.screen.blit(self.bigfont.render("Jugador", True, (255,255,255)), (50, 220))
         for i, c in enumerate(self.game.player.cards):
             self.draw_card(c, 50 + i*(CARD_W+12), 260, face_up=True)
 
-        player_total = f"Player: {self.game.player.total()}"
-        dealer_total = f"Dealer: {'?' if self.game.state=='player_turn' else self.game.dealer.total()}"
+        player_total = f"Jugador: {self.game.player.total()}"
+        dealer_total = f"Crupier: {'?' if self.game.state=='player_turn' else self.game.dealer.total()}"
         self.screen.blit(self.font.render(player_total, True, (255,255,255)), (50, 420))
         self.screen.blit(self.font.render(dealer_total, True, (255,255,255)), (50, 450))
 
-        self.hit_rect = pygame.Rect(50, self.height-80, 100, 40)
-        self.stand_rect = pygame.Rect(180, self.height-80, 100, 40)
-        self.restart_rect = pygame.Rect(310, self.height-80, 100, 40)
-        self.draw_button(self.hit_rect, "Hit")
-        self.draw_button(self.stand_rect, "Stand")
-        self.draw_button(self.restart_rect, "Restart")
+        self.hit_rect = pygame.Rect(50, self.height-80, 120, 40)
+        self.stand_rect = pygame.Rect(190, self.height-80, 120, 40)
+        self.restart_rect = pygame.Rect(330, self.height-80, 120, 40)
+        self.draw_button(self.hit_rect, "Pedir (H)")
+        self.draw_button(self.stand_rect, "Plantarse (S)")
+        self.draw_button(self.restart_rect, "Reiniciar (R)")
 
         if self.game.state == "result":
             self.screen.blit(self.bigfont.render(self.game.result, True, (255,255,255)), (500, 300))
@@ -94,6 +94,13 @@ class PygameUI:
             for ev in pygame.event.get():
                 if ev.type == pygame.QUIT:
                     running = False
+                elif ev.type == pygame.KEYDOWN:
+                    if ev.key == pygame.K_h and self.game.state == "player_turn":
+                        self.game.player_hit()
+                    elif ev.key == pygame.K_s and self.game.state == "player_turn":
+                        self.game.player_stand()
+                    elif ev.key == pygame.K_r:
+                        self.game.deal_initial()
                 elif ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                     mx,my = ev.pos
                     if self.hit_rect.collidepoint(mx,my) and self.game.state=="player_turn":

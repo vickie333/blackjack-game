@@ -18,6 +18,12 @@ class Hand:
             total += 10
         return total
 
+    def is_soft(self) -> bool:
+        # Es mano "soft" si hay un As que actualmente cuenta como 11 sin pasarse
+        base_total = sum(c.value() for c in self.cards)
+        has_ace = any(c.rank == "A" for c in self.cards)
+        return has_ace and base_total + 10 <= 21
+
     def is_blackjack(self) -> bool:
         return len(self.cards) == 2 and self.total() == 21
 

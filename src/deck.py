@@ -24,18 +24,33 @@ class Card:
 
 class Deck:
     def __init__(self, shuffle: bool = True, num_decks: int = 1):
+        self.num_decks = num_decks
+        self._shuffle_on_init = shuffle
         self.cards: List[Card] = []
-        for _ in range(num_decks):
+        self._build_full_deck()
+        if shuffle:
+            self.shuffle()
+
+    def _build_full_deck(self):
+        self.cards = []
+        for _ in range(self.num_decks):
             for s in SUITS:
                 for r in RANKS:
                     self.cards.append(Card(r, s))
+
+    def reset(self, shuffle: bool = True):
+        """Recrea el shoe respetando num_decks y baraja si corresponde."""
+        self._build_full_deck()
         if shuffle:
             self.shuffle()
 
     def shuffle(self):
         random.shuffle(self.cards)
 
+    def remaining(self) -> int:
+        return len(self.cards)
+
     def deal(self) -> Card:
         if not self.cards:
-            self.__init__(shuffle=True)
+            raise RuntimeError("No hay cartas suficientes en el mazo. Llama a reset() o rebaraja antes de repartir.")
         return self.cards.pop()

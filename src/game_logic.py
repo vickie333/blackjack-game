@@ -8,12 +8,19 @@ class Game:
         self.dealer = Hand()
         self.state = "start" 
         self.result = ""
+        # configuración simple: rebarajar cuando queden menos del 25% del shoe
+        self.penetration_threshold = 0.25
+        self.initial_deck_size = self.deck.remaining()
+
+    def reshuffle_if_needed(self):
+        # Si las cartas restantes son menos que el umbral, rebarajamos el shoe completo
+        if self.deck.remaining() <= int(self.initial_deck_size * self.penetration_threshold):
+            self.deck.reset(shuffle=True)
 
     def deal_initial(self):
         self.player.clear()
         self.dealer.clear()
-        if len(self.deck.cards) < 10:
-            self.deck = Deck()
+        self.reshuffle_if_needed()
        
         self.player.add(self.deck.deal())
         self.dealer.add(self.deck.deal())
@@ -35,6 +42,7 @@ class Game:
     def player_hit(self):
         if self.state != "player_turn":
             return
+        self.reshuffle_if_needed()
         self.player.add(self.deck.deal())
         if self.player.is_bust():
             self.state = "result"
@@ -47,8 +55,17 @@ class Game:
         self.dealer_play()
 
     def dealer_play(self):
-        while self.dealer.total() < 17:
-            self.dealer.add(self.deck.deal())
+        # Dealer se planta en cualquier 17 (no hit on soft 17)
+        while True:
+            dealer_total = self.dealer.total()
+            if dealer_total < 17:
+                self.reshuffle_if_needed()
+                self.dealer.add(self.deck.deal())
+                continue
+            if dealer_total == 17 and self.dealer.is_soft():
+                # Plantarse en soft 17 (cambiar a 'hit' si prefieres H17)
+                break
+            break
         self.evaluate()
 
     def evaluate(self):
